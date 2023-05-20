@@ -1,24 +1,31 @@
-import requests
-import ssl
+import subprocess
 
-def get_ssl_cert_expiry_date(endpoint):
-    http = urllib3.PoolManager()
-    response = http.request('GET', 'https://{}'.format(endpoint))
-    if response.status_code == 200:
-        cert = response.headers['content-type'].split(';')[1].split('/')[1]
-        expiry_date = '{}-{}-{}'.format(cert[0:4], cert[5:7], cert[8:10])
-        return expiry_date
-    else:
-        return None
+def get_certificate_expiry_days(hostname, port):
+  """
+  This function returns the number of days before the certificate expires for the given hostname and port.
 
-def monitor_ssl_expiry(endpoints):
-    for endpoint in endpoints:
-        expiry_date = get_ssl_cert_expiry_date(endpoint)
-        if expiry_date is not None:
-            print('The SSL cert for {} expires on {}'.format(endpoint, expiry_date))
-        else:
-            print('The SSL cert for {} is not valid'.format(endpoint))
+  Args:
+    hostname: The hostname of the server.
+    port: The port of the server.
 
-if __name__ == '__main__':
-    endpoints = ['www.google.com', 'www.facebook.com', 'www.yahoo.com']
-    monitor_ssl_expiry(endpoints)
+  Returns:
+    The number of days before the certificate expires.
+  """
+
+  command = ['openssl', 's_client', '-connect', hostname + ':' + port]
+  output = subprocess.check_output(command)
+
+  for line in output.decode('utf-8').splitlines():
+    if 'Not After' in line:
+      expiry_date = line.split()[1]
+      break
+
+  expiry_date = expiry_date.replace(',', '')
+  expiry_date = expiry_date.replace(' ', '')
+
+  expiry_date_time = datetime.datetime.strptime(expiry_date, '%Y%m%d%H%M%SZ')
+  now = datetime.datetime.now()
+
+  days_until_expiry = (expiry_date_time - now).days
+
+  return days_until_expiry
