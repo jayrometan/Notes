@@ -1,0 +1,10 @@
+# Source: webapp-color/templates/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: webapp-sa
+  labels:
+    mode: proxy
+    tier: frontend
+    type: web
+    app: webapp-color
