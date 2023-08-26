@@ -1,0 +1,21 @@
+stages:
+  - sign
+  - upload
+
+variables:
+  DOCKER_IMAGE: centos
+  ARTIFACTORY_URL: <artifactory_url_here>
+
+sign:
+  stage: sign
+  image: $DOCKER_IMAGE
+  script:
+    - docker run --rm -v $(pwd):/work $DOCKER_IMAGE sh -c "cp /work/file_to_sign . && sign_command_here"
+
+upload:
+  stage: upload
+  image: $DOCKER_IMAGE
+  script:
+    - FILE_VERSION=$(git describe --always --tags)
+    - docker run --rm -v $(pwd):/work $DOCKER_IMAGE sh -c "curl -u <artifactory_user>:<artifactory_password> -T file_to_sign 
+$ARTIFACTORY_URL/file_to_sign-$FILE_VERSION"
