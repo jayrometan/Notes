@@ -1,3 +1,4 @@
+## One
 stages:
   - sign
   - upload
@@ -19,3 +20,50 @@ upload:
     - FILE_VERSION=$(git describe --always --tags)
     - docker run --rm -v $(pwd):/work $DOCKER_IMAGE sh -c "curl -u <artifactory_user>:<artifactory_password> -T file_to_sign 
 $ARTIFACTORY_URL/file_to_sign-$FILE_VERSION"
+
+
+## Two
+stages:
+  - sign
+  - upload
+
+variables:
+  DOCKER_IMAGE: imageD
+  ARTIFACTORY_URL: <artifactory_url_here>
+
+sign:
+  stage: sign
+  image: docker:19.03.12
+  services:
+    - docker:19.03.12-dind
+  script:
+    - docker pull $DOCKER_IMAGE
+    - docker run --rm -v $(pwd):/work $DOCKER_IMAGE sh -c "cp /work/file_to_sign /temp && /path/to/sign_command -i /temp/file_to_sign -o /work/signed_file"
+  artifacts:
+    paths:
+      - signed_file
+
+upload:
+  stage: upload
+  image: docker:19.03.12
+  services:
+    - docker:19.03.12-dind
+  script:
+    - FILE_VERSION=$(git describe --always --tags)
+    - docker run --rm -v $(pwd):/work $DOCKER_IMAGE sh -c "curl -u <artifactory_user>:<artifactory_password> -T /work/signed_file $ARTIFACTORY_URL/file_to_sign-$FILE_VERSION"
+  variables:
+    ARTIFACTORY_USER: <artifactory_user>
+    ARTIFACTORY_PASSWORD: <artifactory_password>
+
+##
+#Let's break down this .gitlab-ci.yml file:
+
+#The sign stage pulls the Docker image imageD (replace with the actual image name) and runs a container from that image. It copies the file_to_sign from the current repository directory to a temporary location inside the container. Then, it executes the sign command (replace /path/to/sign_command with the actual command and appropriate options) to sign the file and output it as signed_file. The signed_file is saved as an artifact for subsequent stages.
+
+#The upload stage uses the docker image and services to enable Docker within the GitLab runner. It retrieves the signed file from the artifact, assigns the Git tag or commit hash to FILE_VERSION, and uploads the signed_file using the curl command to the specified Artifactory URL. Ensure to replace <artifactory_user>, <artifactory_password>, and <artifactory_url_here> with your actual Artifactory credentials and URL.
+
+#This .gitlab-ci.yml file defines two stages: sign and upload. The sign stage copies the file to be signed to the imageD container, while the upload stage retrieves the signed file and uploads it to Artifactory.
+
+#Please make sure to replace the placeholders in the YAML with the appropriate values for your use case, such as the image name and the sign command's path and options.
+
+##
