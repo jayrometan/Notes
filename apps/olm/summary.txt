@@ -1,0 +1,226 @@
+Video: https://www.youtube.com/watch?v=5PorcMTYZTo
+
+Introduction to Operator Lifecycle Manager (OLM)
+Section Overview: In this section, the speaker introduces the Operator Lifecycle Manager (OLM) and explains its purpose in managing the lifecycle of operators 
+in Kubernetes.
+
+What is OLM?
+OLM is a Kubernetes native application designed to automate the installation and management of operators.
+It simplifies tasks such as manual installation, updates, and maintenance of different operators.
+OLM can be installed on any Kubernetes cluster, including OpenShift.
+Installation Options
+OLM comes pre-installed with OpenShift.
+For non-OpenShift clusters, it can be installed manually by following the install guide at olm.operatorframework.io or using the script hosted on the Operator 
+Framework GitHub page.
+Components of OLM
+OLM consists of two main operators: Catalog Operator and OLM Operator.
+The Package Server deployment is another component that will be discussed later.
+Custom Resource Definitions (CRDs) specific to OLM are also installed during setup.
+02:47 Verifying CRD Installation
+Section Overview: This section focuses on verifying the installation of Custom Resource Definitions (CRDs) for OLM.
+
+Verifying CRD Installation
+To check if CRDs have been installed, navigate to "Admin" > "Custom Resource Definitions" in the console.
+Search for "operator.coros.com" to find the relevant CRDs.
+Six CRDs should be installed by OLM and Catalog Operators.
+03:07 Understanding Primary Components of OLM
+Section Overview: This section provides a deeper understanding of the primary components that make up OLM.
+
+Cluster Service Version (CSV)
+CSV is a YAML manifest file that represents an operator at a specific version.
+Each new version of an operator is a new CSV.
+CSV includes metadata, such as name, description, version, and icon.
+It also specifies the CRDs owned by the operator and any required CRDs.
+Install Strategy
+The install strategy section in CSV guides the OLM Operator on how to provision resources for running the operator.
+The OLM Operator follows this strategy when all necessary resources exist in the cluster.
+04:54 Sample Cluster Service Version (CSV)
+Section Overview: This section provides a sample Cluster Service Version (CSV) manifest file for better understanding.
+
+Sample CSV Manifest
+A sample CSV manifest represents an operator with its name, namespace, and other details.
+It includes sections for owned CRDs and required CRDs.
+These are the main points covered in the transcript.
+
+05:37 Overview of Operator Deployment Resources
+Section Overview: This section explains the resources required to deploy an operator, including permissions and the actual operator deployment. It mentions that 
+sometimes there can be a large number of resources listed, such as multiple deployments.
+
+Operator Deployment Resources
+The resources required for operator deployment include permissions and the actual operator deployment.
+In some cases, there may be multiple deployments and other resources listed.
+The "install mode" stanza in the CSV file determines how the operator is installed.
+06:12 Viewing CSVs in Your Cluster
+Section Overview: This section demonstrates how to view CSVs (Cluster Service Versions) in your cluster using commands or the OpenShift dashboard.
+
+Viewing CSVs
+To view CSVs in a specific namespace using command-line interface:
+Use oc get csv -n <namespace> command.
+Replace <namespace> with the desired namespace name.
+Example: oc get csv -n mynamespace
+To view CSVs using the OpenShift dashboard:
+Go to Operators > Installed Operators in the dashboard.
+Select the desired namespace to see the associated CSVs.
+07:19 Role of OLM Operator in Deploying Operators
+Section Overview: This section explains the role of OLM (Operator Lifecycle Manager) operator in deploying operators based on their Cluster Service Version 
+(CSV).
+
+OLM Operator Functionality
+The OLM operator watches for CSVs appearing in any namespaces it is monitoring (by default, all namespaces).
+Once a CSV is detected, the OLM operator deploys the corresponding operator based on its specifications mentioned under "install" stanza in the CSV file.
+The installation process starts after confirming that all required Custom Resource Definitions (CRDs) listed in the CSV are present in the cluster.
+The presence of required CRDs ensures that the operator has access to the necessary resources for proper functioning.
+08:50 Handling Dependencies between Operators
+Section Overview: This section discusses how dependencies between operators are handled and addresses two questions: 1) How to obtain a copy of the desired CSV, 
+and 2) What installs dependent operators.
+
+Handling Operator Dependencies
+To obtain a copy of a specific CSV:
+Use a catalog source, which is a repository containing a catalog of different operators that can be installed in your cluster.
+Catalog sources contain packages, each with its own stream of updates called channels.
+Channels store CSVs, CRDs, and other required components for installing specific versions of an operator.
+The OLM operator checks subscribed channels for new versions and applies them automatically.
+Dependencies between operators are managed through catalog sources and channels.
+Automated mechanisms handle dependency chains by ensuring that all required operators are installed before deploying dependent ones.
+11:15 Understanding Catalog Sources and Subscriptions
+Section Overview: In this section, we will learn about catalog sources and subscriptions in Operator Lifecycle Manager (OLM).
+
+Catalog Sources
+A common way to distribute a list of operators is through an image embedded with the catalog.
+The catalog operator's job is to run this image in a pod and provide a gRPC API for OLM to query information on available packages.
+The catalog source can be configured to poll an image repository at regular intervals to pull down the latest catalog image when updates are available.
+Subscriptions
+Subscriptions act as the glue between an actual running operator and its presence in a catalog source.
+To install an operator from a specific channel in a package from the catalog source, you create a subscription.
+A subscription specifies the namespace and name of the catalog source containing the operator, as well as the name and channel of the operator you want to 
+subscribe to.
+Handling Upgrades with Subscriptions
+By default, all subscriptions are configured to automatically approve updates to an operator.
+When there is a new version available in the subscribed channel, OLM automatically creates an install plan that defines all the resources required for 
+installing or upgrading to that new version.
+If you want manual control over installing new versions, you can specify "manual" approval in the subscription. However, it becomes your responsibility to 
+monitor and update install plans accordingly.
+Upgrade Paths with Replacers
+OLM discovers upgrade paths using a field called "replacers" in CSV (ClusterServiceVersion).
+Replacers point from one version of an operator CSV to another version.
+When updating operators, OLM starts at the goal state (latest version) and follows replacers backward until it reaches the current installed version.
+15:00 Managing Operator Upgrades and Vulnerabilities
+Section Overview: In this section, we will explore how OLM handles operator upgrades and vulnerabilities.
+
+OLM ensures that clusters with vulnerable versions of an operator upgrade to the newest version.
+If a cluster has already updated to a vulnerable version, OLM will initiate the upgrade to the latest version.
+Upgrades are determined based on replacers in CSVs, which define the upgrade paths from one version to another.
+It is important to be patient with updates as they can take some time to complete.
+11:15 What are Catalog Sources?
+Section Overview: This section provides an introduction to catalog sources and their role in distributing lists of operators.
+
+Key Points
+Catalog sources distribute lists of operators through images embedded with catalogs.
+The catalog operator runs the image in a pod and provides a gRPC API for querying available packages.
+Catalog sources can be configured to regularly poll image repositories for updates.
+12:06 How Subscriptions Work
+Section Overview: This section explains how subscriptions work and their role in installing operators from catalog sources.
+
+Key Points
+Subscriptions act as a bridge between running operators and their presence in catalog sources.
+To install an operator from a specific channel in a package, you create a subscription specifying the namespace, name of the catalog source, and name/channel of 
+the operator.
+Subscriptions allow for automatic approval or manual control over updates.
+13:12 Automatic Approval vs Manual Control
+Section Overview: This section discusses automatic approval and manual control options for managing updates with subscriptions.
+
+Key Points
+By default, subscriptions are configured for automatic approval of updates.
+Automatic approval triggers creation of install plans defining resources required for installing/upgrading to new versions.
+Manual control requires monitoring install plans and manually updating the "approved" field when ready to proceed with installation.
+14:03 Monitoring Install Plans
+Section Overview: This section explains the importance of monitoring install plans and how they relate to managing operator versions.
+
+Key Points
+Install plans are created in the same namespace as the operator whenever a new version is available.
+Manually updating the "approved" field in install plans allows OLM to proceed with installation.
+Failure to update the "approved" field will result in the operator remaining at its current version indefinitely.
+15:00 Upgrades and Replacers
+Section Overview: This section explores how OLM handles upgrades using replacers defined in CSVs.
+
+Key Points
+Replacers are used by OLM to identify upgrade paths from one version of an operator CSV to another.
+When a new version is available, OLM starts at the goal state (latest version) and follows replacers backward until it reaches the current installed version.
+Upgrades may take some time to complete, so patience is required.
+15:53 Managing Operator Vulnerabilities
+Section Overview: This section discusses how OLM ensures clusters with vulnerable versions of operators are upgraded to newer versions.
+
+Key Points
+OLM identifies clusters with vulnerable versions and initiates upgrades to the latest non-vulnerable version.
+Upgrade paths are determined based on replacers defined in CSVs.
+It is important for OLM to ensure all clusters are running non-vulnerable versions.
+16:30 Understanding Cluster Service Versions and Operators
+Section Overview: In this section, the speaker explains the concept of cluster service versions (CSVs) and operators in OpenShift Lifecycle Manager (OLM).
+
+Cluster Service Versions (CSVs)
+CSVs are packaged or bundled versions of an operator at a specific version.
+They can be compared to RPM or APK packages for an operator.
+OLM supports syntax in CSVs to skip older versions when updating to avoid vulnerabilities or bugs.
+Catalog Source, Subscription, and Install Plans
+Catalog source presents information on operators to OLM for discovery and installation.
+Subscription is used to request the installation and maintenance of an operator from a specific channel in a package catalog.
+Install plans are generated for each new CSV being applied to the cluster and contain details of all resources needed for installation or upgrade.
+Catalog Operator and Operator Groups
+The catalog operator creates install plans for CSVs.
+Operator groups provide basic multi-tenancy by creating access permissions for operators in namespaces where their resources are running.
+The catalog operator is responsible for updating catalog sources, watching subscribed channels, and creating install plans.
+Only one operator group can be created per namespace. Multiple groups will cause deployment failures.
+19:07 Operator Groups and API Conflicts
+Section Overview: This section focuses on how operator groups ensure proper API management within namespaces.
+
+Operator Group Functionality
+Operator groups create access permissions for operators in namespaces where their resources are running.
+Permissions are generated through RBAC permissions based on tasks performed by operators.
+Preventing API Conflicts
+An operator group prevents conflicts with APIs within targeted namespaces.
+If two different operators handle the same API within a namespace, conflicts may occur, leading to unexpected results.
+The provided APIs annotation ensures prevention of conflicts with APIs in the targeted namespace.
+Limitations of Operator Groups
+Only one operator group can be created per namespace.
+If multiple operator groups exist in a namespace, CSV deployment will fail until the number of groups is reduced to one.
+20:08 Install Modes and Operator Group Membership
+Section Overview: This section explains how an operator becomes a member of an operator group based on install modes.
+
+Conditions for Operator Group Membership
+There must be only one operator group in the namespace for operators to deploy successfully.
+The CSV must have an install mode supported by the targeted namespaces of the operator group.
+Install Modes and CSV Requirements
+The install mode stanza in the CSV specifies which namespaces are supported by the operator.
+Different install modes include all namespaces, own namespaces, single namespaces, and multi-namespaces.
+The CSV requires an operator group if it supports all namespaces but not other specific modes.
+Note: Timestamps are provided at relevant points in the transcript.
+
+21:33 Namespaces and Operator Groups
+Section Overview: This section discusses the concept of namespaces and operator groups in OpenShift. Namespaces allow for better organization and isolation of 
+resources, while operator groups determine the scope of impact for operators.
+
+Namespaces and Install Modes
+Namespaces in OpenShift provide isolation for resources.
+Wide operators are installed cluster-wide, impacting all namespaces.
+Namespace-scoped operators only affect the resources within their own namespace.
+Namespace-scoped operators make it easier to upgrade without impacting other namespaces.
+Cluster-scoped operators have better potential for reusability.
+Package Server
+The package server is a deployment that comes with the installation of OLM.
+It aggregates packages available across catalogs, allowing users to view multiple catalogs at once.
+The aggregation layer in Kubernetes allows registering new API endpoints to extend the API.
+OLM uses both CRDs and the aggregation layer to expose a package manifests API endpoint.
+kubectl get package manifests lists available operators from all catalog sources configured for the cluster.
+Understanding Package Manifests
+Package manifest API version: packages.operators.coreos.com/v1.
+The package manifest points to the OpenShift Operator Lifecycle Manager (OLM) package server service.
+Requests made to this API hit pods owned by the package server deployment.
+25:06 Operator Lifecycle Manager (OLM) and Operator Framework
+Section Overview: This section provides an overview of OLM from an administrative perspective, including packaging, deployment, installation, and building 
+operators using the Operator Framework.
+
+Admin Perspective on OLM
+OLM handles packaging, deployment, installation, and management of existing operators.
+Building Operators with Operator Framework
+The Operator Framework provides tools for building operators.
+It covers aspects like packaging apps correctly for use by OLM.
