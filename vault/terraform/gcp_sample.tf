@@ -2,6 +2,7 @@
 # https://discuss.hashicorp.com/t/switching-to-different-aws-kms-key-id-with-the-same-key-material/19116/5
 #https://github.com/hashicorp/vault/issues/6046
 
+# Seems putting external key doesn't change the key contents even if the ID change (for now)
 
 # Configure the Google Cloud provider
 provider "google" {
