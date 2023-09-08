@@ -1,3 +1,5 @@
+# https://cloud.google.com/kms/docs/key-import#key_import_flow
+
 # Configure the Google Cloud provider
 provider "google" {
   credentials = file(var.account_file_path)
