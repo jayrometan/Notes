@@ -1,5 +1,5 @@
 # https://cloud.google.com/kms/docs/key-import#key_import_flow
-
+# https://discuss.hashicorp.com/t/switching-to-different-aws-kms-key-id-with-the-same-key-material/19116/5
 # Configure the Google Cloud provider
 provider "google" {
   credentials = file(var.account_file_path)
