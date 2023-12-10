@@ -99,7 +99,7 @@ It visualize the service mesh topology and provide visbility into features like 
 Also offers wizards to apply ??
 
 ```
-# Install kiali on cluster
+# Install kiali on cluster via operator
 helm repo add kiali https://kiali.org/helm-charts
 helm repo update
 helm install kiali-operator \
@@ -122,4 +122,7 @@ kubectl rollout status deployment/kiali -n istio-system
 
 # access kiali dashboard
 istioctl dashboard kiali
+
+# Without operator
+https://kiali.io/docs/installation/installation-guide/install-with-helm/
 ```
