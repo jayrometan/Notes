@@ -316,3 +316,5 @@ spec:
 - Set up Istio authorization for HTTP/TCP traffic in the mesh
 - Configure mutual TLS at mesh, namespace, and workload levels
 
+**Links**
+- https://learncloudnative.com/blog/2023-10-10-meshweek
