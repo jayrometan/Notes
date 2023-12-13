@@ -58,6 +58,66 @@ kubectl label namespace plat-default istio-injection=enabled
 istioctl dashboard kiali
 ```
 
+### Gateway vs Virtual Service
+Gateway:
+- Purpose: It defines an entry point for traffic into or out of the mesh. It specifies the ports on which the gateway listens and the backend services to which it can forward traffic.
+- Scope: It applies to a specific set of ports and can be defined at the global or namespace level.
+- Configuration: It defines the properties of the load balancer, such as the type of load balancing algorithm and the port where the service is running.
+
+VirtualService:
+- Purpose: It defines how traffic is routed within the mesh. It can be used to route traffic to different versions of a service, perform load balancing, or implement traffic shaping and security policies.
+- Scope: It applies to a specific set of hostnames and can be targeted at specific gateways or sidecars.
+- Configuration: It defines the routing rules, including the destination services, weight distribution, and any additional transformations or modifications to be applied to the traffic.
+
+Relationship Summary:
+- Gateways act as the doors to the mesh, providing entry and exit points for traffic.
+- VirtualServices act as the traffic controllers, directing traffic to the appropriate destinations within the mesh.
+- Multiple VirtualServices can be bound to a single Gateway, enabling fine-grained control over traffic routing
+
+
+Jerome
+- Gateway will tell Istio to look out for a special hostname at a special port. Also, if you wanna handle TLS offloading.
+
+```yaml
+# The following example shows a possible gateway configuration for external HTTPS ingress traffic:
+
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: ext-host-gwy
+spec:
+  selector:
+    app: my-gateway-controller
+  servers:
+  - port:
+      number: 443
+      name: https
+      protocol: HTTPS
+    hosts:
+    - ext-host.example.com
+    tls:
+      mode: SIMPLE
+      credentialName: ext-host-cert
+
+# This gateway configuration lets HTTPS traffic from ext-host.example.com into the mesh on port 443, but doesn’t specify any routing for the traffic.
+
+# To specify routing and for the gateway to work as intended, you must also bind the gateway to a virtual service.
+# You do this using the virtual service’s gateways field, as shown in the following example:
+
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: virtual-svc
+spec:
+  hosts:
+  - ext-host.example.com
+  gateways:
+  - ext-host-gwy
+
+# You can then configure the virtual service with routing rules for the external traffic.
+
+```
+  
 #### CRDs
 
 | CRD Name                              | Description                                                                                              | CRD Type    |
@@ -318,3 +378,32 @@ spec:
 
 **Links**
 - https://learncloudnative.com/blog/2023-10-10-meshweek
+
+
+
+### To update with YAMLs and stuff
+
+**Istio Installation, Upgrade and Configuration (7%)**
+  
+1. Using the Istio CLI to install a basic cluster
+
+2. Customizing the Istio installation with the IstioOperator API
+3. Using overlays to manage Istio component settings
+
+**Traffic Management (40%)**
+- Controlling network traffic flows within a service mesh
+- Configuring sidecar injection
+- Using the Gateway resource to configure ingress and egress traffic
+- Understanding how to use ServiceEntry resources for adding entries to internal service registry
+- Define traffic policies using DestinationRule
+- Configure traffic mirroring capabilities
+
+**Resilience and Fault Injection (20%)**
+- Configuring circuit breakers (with or without outlier detection)
+- Using resilience features
+- Creating fault injection
+
+**Security Workloads (20%)**
+- Understand Istio security features
+- Set up Istio authorization for HTTP/TCP traffic in the mesh
+- Configure mutual TLS at mesh, namespace, and workload levels
