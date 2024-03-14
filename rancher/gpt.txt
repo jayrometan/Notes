@@ -1,0 +1,28 @@
+## Mixing rbac and rmc
+
+You're absolutely right. Aligning permissions between the native Kubernetes RBAC resources on the downstream clusters and the Rancher Management Console (RMC) RBAC system becomes more complicated when dealing with Rancher projects and namespaces within those projects.
+
+The challenge arises due to the following factors:
+
+Project Scope Permissions: In the RMC, permissions can be granted at the project scope, which governs access to all namespaces within that project. This is part of Rancher's hierarchical RBAC model.
+Namespace Annotations: Rancher manages namespaces within projects by adding specific annotations to the namespace objects. These annotations associate the namespaces with their respective projects.
+Namespace-Level RBAC: Native Kubernetes RBAC resources like Roles and RoleBindings are scoped to individual namespaces. However, the project-level permissions in the RMC apply to all namespaces within that project, regardless of their individual RBAC configurations.
+To align permissions between the two systems at the namespace level, you would need to:
+
+Identify all namespaces associated with a particular Rancher project (based on the project annotations).
+Create equivalent RBAC resources (Roles, RoleBindings) in each of those namespaces, matching the permissions granted by the Rancher project-level roles.
+Ensure that any changes to the project-level permissions in the RMC are reflected in the RBAC resources across all associated namespaces.
+This process can become cumbersome and error-prone, especially in environments with a large number of projects and namespaces, or where project/namespace structures change frequently.
+
+Additionally, if you need to grant permissions at a more granular level (e.g., specific namespaces within a project), you would need to create individual RBAC resources for those namespaces, potentially leading to duplication and management overhead.
+
+You're correct in pointing out that attempting to align permissions in this manner can become messy and complicated, especially when dealing with the project and namespace hierarchy in Rancher.
+
+In such cases, it may be more practical to:
+
+Rely on the RMC's built-in RBAC system for managing permissions at the project and namespace levels, leveraging its hierarchical and inheritance capabilities.
+Use native Kubernetes RBAC resources on the downstream clusters for more granular, resource-specific permissions within individual namespaces, as needed.
+Clearly document and communicate the separation of concerns between the two RBAC systems to ensure users understand the scope of their permissions in each system.
+Alternatively, you could explore custom tooling or automation scripts to help manage and synchronize permissions across the two RBAC systems, but this would require significant effort and ongoing maintenance.
+
+Ultimately, the decision should be based on your specific requirements, the complexity of your project and namespace structures, and the trade-offs between ease of management and granular control over permissions.
