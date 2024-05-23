@@ -996,5 +996,5 @@ $ dockerd --debug --host=... --tls=true --tlscert=cert.pem --tls=key.pem
 - Enable SSH key based authentication
 - Determine users who needs access to the server
 
-
+![Alt text](image-4.png)
 #### SECURING CONTROL PLANE
